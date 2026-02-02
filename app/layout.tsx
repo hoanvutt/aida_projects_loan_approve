@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Loan Decision | Demo UI",
+  title: "Bank Loan Approve Decision | Demo UI",
   description: "Single-page UI for Loan Decision API",
 };
 
