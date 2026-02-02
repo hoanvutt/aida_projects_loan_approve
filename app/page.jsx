@@ -238,24 +238,6 @@ export default function Page() {
               <input className={cls(input)} type="number" value={computedMonthlyDebt} readOnly />
             </Field>
           </div>
-
-          <div className="mt-6">
-            <div className="text-xs opacity-70 mb-2">Payload sent to API</div>
-            <pre className={isDark ? "bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs overflow-auto" : "bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs overflow-auto"}>
-              {JSON.stringify(displayForm, null, 2)}
-            </pre>
-          </div>
-
-          {result && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <StatCard title="Default probability" value={Number(result.default_probability).toFixed(6)} dark={isDark} />
-              <StatCard title="Decision threshold" value={Number(result.threshold).toFixed(2)} dark={isDark} />
-            </div>
-          )}
-
-          <div className="mt-5 text-xs opacity-70">
-            Uses <span className="font-mono">POST /api/predict</span> (Next.js proxy) → backend <span className="font-mono">/predict</span>.
-          </div>
         </div>
       </div>
     </div>
