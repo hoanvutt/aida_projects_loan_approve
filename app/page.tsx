@@ -162,16 +162,6 @@ export default function Page() {
               Random demo data
             </button>
           </div>
-
-          <div className="mt-8 space-y-2 text-sm text-slate-500 dark:text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700 dark:text-slate-200">Upstream API:</span>
-              <span className="break-all">{API_BASE}</span>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300">
-              The UI calls <span className="font-mono">/api/predict</span> (Next.js proxy) to avoid browser fetch issues.
-            </div>
-          </div>
         </section>
 
         {/* Right form card */}
