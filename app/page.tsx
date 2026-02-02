@@ -147,21 +147,45 @@ export default function Page() {
   );
 }
 
-function Field({ label, value, onChange, step }: any) {
+
+type FieldProps = {
+  label: string;
+  value: number;
+  step: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+};
+
+function Field({ label, value, onChange, step, min, max }: FieldProps) {
   return (
     <div>
       <label className="text-sm font-semibold">{label}</label>
-      <input type="number" value={value} step={step} onChange={(e)=>onChange(Number(e.target.value))}
-        className="mt-1 w-full rounded-xl border px-3 py-2"/>
+      <input
+        type="number"
+        value={Number.isFinite(value) ? value : 0}
+        step={step}
+        min={min}
+        max={max}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-1 w-full rounded-xl border px-3 py-2"
+      />
     </div>
   );
 }
 
-function ReadOnly({ label, value }: any) {
+type ReadOnlyProps = {
+  label: string;
+  value: string;
+};
+
+function ReadOnly({ label, value }: ReadOnlyProps) {
   return (
     <div>
       <label className="text-sm font-semibold">{label}</label>
-      <div className="mt-1 rounded-xl border px-3 py-2 bg-slate-50">{value}</div>
+      <div className="mt-1 rounded-xl border px-3 py-2 bg-slate-50 dark:bg-slate-900/40">
+        {value}
+      </div>
     </div>
   );
 }
