@@ -1,18 +1,27 @@
+# Loan Approval Frontend UI (Next.js + Tailwind)
 
-# Loan Approval Frontend UI
+This UI tests your FastAPI Loan Approval API.
 
-Next.js UI to test Loan Approval Logistic Regression API.
+## Why your build failed before
+Next.js App Router requires `app/layout.*`. This project includes:
+- `app/layout.jsx`
+- `app/page.jsx`
+- Tailwind configs
 
-## Features
-- Manual input
-- 🎲 Random data generator
-- Auto-calculate monthly debt
-- Deployable on Railway
+## Env var (Railway Variables)
+Set:
+- `NEXT_PUBLIC_API_URL` = `https://<your-loan-api-domain>`
 
-## ENV
-Set in Railway:
-NEXT_PUBLIC_API_URL=https://<your-loan-api-domain>
+Example:
+`NEXT_PUBLIC_API_URL=https://loan-approval-api-production.up.railway.app`
 
-## Deploy
-- Upload repo to Railway
-- It will auto-detect Next.js
+## Local run
+```bash
+npm install
+npm run dev
+```
+
+## Railway Deploy
+- Deploy from GitHub
+- Add env var
+- Done
