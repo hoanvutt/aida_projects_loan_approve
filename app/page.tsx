@@ -116,10 +116,7 @@ export default function Page() {
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500" />
           <div>
-            <div className="text-base font-bold">Loan Decision</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              Single-page UI • Proxy API call (no CORS)
-            </div>
+            <div className="text-base font-bold">Bank Loan Approve Decision</div>
           </div>
         </div>
 
