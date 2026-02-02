@@ -1,27 +1,26 @@
-# Loan Approval Frontend UI (Next.js + Tailwind)
+# Loan Approval Frontend UI (Proxy Fix)
 
-This UI tests your FastAPI Loan Approval API.
+This UI calls your backend through **Next.js API routes** to avoid CORS issues.
 
-## Why your build failed before
-Next.js App Router requires `app/layout.*`. This project includes:
-- `app/layout.jsx`
-- `app/page.jsx`
-- Tailwind configs
+## Backend API (default)
+This repo is preconfigured to use:
+https://aida-sos-loan-prediction-api.up.railway.app
 
-## Env var (Railway Variables)
-Set:
-- `NEXT_PUBLIC_API_URL` = `https://<your-loan-api-domain>`
+If you want to change it, set Railway Variable:
+- `BACKEND_API_URL` = `https://your-backend-domain`
 
-Example:
-`NEXT_PUBLIC_API_URL=https://loan-approval-api-production.up.railway.app`
+## Why this fixes "Failed to fetch"
+Browser → calls **same-origin** `/api/predict`  
+Server → calls backend `https://aida-sos-loan-prediction-api.up.railway.app/predict`
 
-## Local run
-```bash
-npm install
-npm run dev
-```
+So CORS is no longer a problem.
 
-## Railway Deploy
-- Deploy from GitHub
-- Add env var
-- Done
+## Deploy to Railway
+1. Push to GitHub
+2. Railway → Deploy from repo
+3. (Optional) set `BACKEND_API_URL`
+4. Done
+
+## Test
+- UI calls: `/api/predict`
+- Health proxy: `/api/health`

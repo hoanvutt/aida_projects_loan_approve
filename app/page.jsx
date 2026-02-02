@@ -25,7 +25,7 @@ export default function Page() {
     Marital_Status: 'Married',
     Residential_Status: 'Own',
     employment_years: 5,
-    monthly_income: 5000, // UI uses monthly income
+    monthly_income: 5000, // monthly 3k-15k
     credit_score: 700,
     loan_amount: 25000,
     loan_term: 60,
@@ -33,14 +33,11 @@ export default function Page() {
     monthly_debt: 0
   })
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || ""
-
   const computedMonthlyDebt = useMemo(() => {
     const pmt = calcMonthlyPayment(Number(form.loan_amount), Number(form.Interest_Rate), Number(form.loan_term))
     return Math.round(pmt)
   }, [form.loan_amount, form.Interest_Rate, form.loan_term])
 
-  // Keep monthly_debt synced with the formula requested
   const displayForm = useMemo(() => ({...form, monthly_debt: computedMonthlyDebt}), [form, computedMonthlyDebt])
 
   function updateField(k, v) {
@@ -53,7 +50,7 @@ export default function Page() {
     const Marital_Status = pick(['Married', 'Single'])
     const Residential_Status = pick(['Own', 'Rent'])
     const employment_years = randInt(0, Math.min(40, age - 18))
-    const monthly_income = randInt(3000, 15000) // (Note: your message says 30000~15000; I assume monthly 3k~15k)
+    const monthly_income = randInt(3000, 15000)
     const credit_score = randInt(550, 850)
     const loan_amount = randInt(5000, 100000)
     const loan_term = pick([12, 24, 36, 48, 60, 72, 84])
@@ -79,14 +76,13 @@ export default function Page() {
     setError('')
     setResult(null)
     try {
-      if (!apiBase) throw new Error("Missing NEXT_PUBLIC_API_URL. Set it in Railway Variables.")
-      const res = await fetch(apiBase.replace(/\/$/, '') + '/predict', {
+      const res = await fetch('/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(displayForm)
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data?.detail ? JSON.stringify(data.detail) : "Request failed")
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || data?.detail || "Request failed")
       setResult(data)
     } catch (e) {
       setError(String(e?.message || e))
@@ -101,12 +97,11 @@ export default function Page() {
   const input = isDark ? "bg-slate-950 border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
   const btn = isDark ? "bg-indigo-500 hover:bg-indigo-400 text-white" : "bg-indigo-600 hover:bg-indigo-500 text-white"
   const btn2 = isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-100" : "bg-slate-100 hover:bg-slate-200 text-slate-900"
-  const badgeSpam = isDark ? "bg-rose-500/15 text-rose-300 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200"
-  const badgeHam  = isDark ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+  const badgeBad = isDark ? "bg-rose-500/15 text-rose-300 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200"
+  const badgeGood  = isDark ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
 
   return (
     <div className={shell + " min-h-screen"}>
-      {/* Header */}
       <div className="border-b border-slate-200/60 dark:border-slate-800/80">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -120,11 +115,12 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <a
               className={"px-4 py-2 rounded-xl border text-sm " + (isDark ? "border-slate-800 hover:bg-slate-900" : "border-slate-200 hover:bg-slate-50")}
-              href={(apiBase ? apiBase.replace(/\/$/, '') : '') + "/docs"}
+              href={"/api/health"}
               target="_blank"
               rel="noreferrer"
+              title="Calls backend /health through proxy"
             >
-              API Docs
+              API Health
             </a>
             <button
               className={"px-4 py-2 rounded-xl border text-sm flex items-center gap-2 " + (isDark ? "border-slate-800 hover:bg-slate-900" : "border-slate-200 hover:bg-slate-50")}
@@ -136,9 +132,7 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Main */}
       <div className="mx-auto max-w-6xl px-6 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left copy */}
         <div className="pt-4">
           <h1 className="text-5xl font-extrabold tracking-tight">Build. Test. Deploy.</h1>
           <p className="mt-5 text-lg opacity-80 max-w-xl">
@@ -155,7 +149,7 @@ export default function Page() {
 
           {result && (
             <div className="mt-8 flex items-center gap-3">
-              <span className={"px-3 py-1 rounded-full border text-sm font-semibold " + (result.approve ? badgeHam : badgeSpam)}>
+              <span className={"px-3 py-1 rounded-full border text-sm font-semibold " + (result.approve ? badgeGood : badgeBad)}>
                 {result.approve ? "APPROVE" : "REJECT"}
               </span>
               <span className="opacity-80">
@@ -165,15 +159,16 @@ export default function Page() {
           )}
 
           {error && (
-            <div className={"mt-6 px-4 py-3 rounded-2xl border " + badgeSpam}>
+            <div className={"mt-6 px-4 py-3 rounded-2xl border " + badgeBad}>
               <div className="font-semibold">Error</div>
               <div className="text-sm mt-1 break-words">{error}</div>
-              <div className="text-xs mt-2 opacity-80">Tip: set <code className="font-mono">NEXT_PUBLIC_API_URL</code> in Railway.</div>
+              <div className="text-xs mt-2 opacity-80">
+                Optional: set <code className="font-mono">BACKEND_API_URL</code> in Railway Variables (otherwise uses default).
+              </div>
             </div>
           )}
         </div>
 
-        {/* Right form card */}
         <div className={"rounded-3xl border p-6 shadow-sm " + card}>
           <div className="flex items-center justify-between">
             <div>
@@ -181,7 +176,7 @@ export default function Page() {
               <div className="text-sm opacity-70">All fields required</div>
             </div>
             {result && (
-              <span className={"px-3 py-1 rounded-full border text-sm font-semibold " + (result.approve ? badgeHam : badgeSpam)}>
+              <span className={"px-3 py-1 rounded-full border text-sm font-semibold " + (result.approve ? badgeGood : badgeBad)}>
                 {result.approve ? "APPROVE" : "REJECT"}
               </span>
             )}
@@ -259,7 +254,7 @@ export default function Page() {
           )}
 
           <div className="mt-5 text-xs opacity-70">
-            Uses <span className="font-mono">POST /predict</span> on your FastAPI backend.
+            Uses <span className="font-mono">POST /api/predict</span> (Next.js proxy) → backend <span className="font-mono">/predict</span>.
           </div>
         </div>
       </div>
