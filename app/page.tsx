@@ -137,7 +137,7 @@ export default function Page() {
         {/* Left hero */}
         <section className="flex flex-col justify-center">
           <h1 className="text-5xl font-black tracking-tight text-slate-900 dark:text-white sm:text-6xl">
-            Build. Test. Deploy.
+            Loan Approve Decision
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
             Enter customer data and run a quick loan decision check using your deployed model.
