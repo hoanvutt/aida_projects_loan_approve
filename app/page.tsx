@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import ThemeToggle from "./components/ThemeToggle";
 
 type LoanInput = {
@@ -16,17 +16,9 @@ type LoanInput = {
 type PredictResponse = {
   approved: number;
   prob_default: number;
-  default_prob_threshold: number;
+  default_prob_threshold?: number;
   derived?: { debt_to_income_ratio?: number };
 };
-
-const DEFAULT_API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "https://aida-sos-loan-prediction-api.up.railway.app";
-
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n));
-}
 
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -39,9 +31,9 @@ function randomFloat(min: number, max: number, decimals = 0) {
 }
 
 export default function Page() {
-  const [apiBase, setApiBase] = useState(DEFAULT_API_BASE);
-  const [serverThreshold, setServerThreshold] = useState<number | null>(null);
-  const [loadingHealth, setLoadingHealth] = useState(false);
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    "https://aida-sos-loan-prediction-api.up.railway.app";
 
   const [form, setForm] = useState<LoanInput>({
     age: 35,
@@ -61,29 +53,6 @@ export default function Page() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  async function fetchHealth(base: string) {
-    try {
-      setLoadingHealth(true);
-      const res = await fetch(`${base}/health`, { cache: "no-store" });
-      if (!res.ok) throw new Error(`Health check failed (${res.status})`);
-      const data = await res.json();
-      if (typeof data.default_prob_threshold === "number") {
-        setServerThreshold(data.default_prob_threshold);
-      } else {
-        setServerThreshold(null);
-      }
-    } catch (e: any) {
-      setServerThreshold(null);
-    } finally {
-      setLoadingHealth(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchHealth(apiBase);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const onChange = (key: keyof LoanInput, value: number) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -111,7 +80,8 @@ export default function Page() {
     setResult(null);
 
     try {
-      const res = await fetch(`${apiBase}/predict`, {
+      // IMPORTANT: call the local Next.js API route to avoid browser CORS issues.
+      const res = await fetch(`/api/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -137,7 +107,7 @@ export default function Page() {
     ? "bg-emerald-500/10 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:border-emerald-800"
     : "bg-rose-500/10 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:border-rose-900";
 
-  const openDocs = () => window.open(`${apiBase}/docs`, "_blank");
+  const openDocs = () => window.open(`${API_BASE}/docs`, "_blank");
 
   return (
     <div className="min-h-screen">
@@ -148,7 +118,7 @@ export default function Page() {
           <div>
             <div className="text-base font-bold">Loan Decision</div>
             <div className="text-xs text-slate-500 dark:text-slate-400">
-              Logistic + Random Forest • Loan Default Risk API
+              Single-page UI • Proxy API call (no CORS)
             </div>
           </div>
         </div>
@@ -198,30 +168,11 @@ export default function Page() {
 
           <div className="mt-8 space-y-2 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700 dark:text-slate-200">API base:</span>
-              <span className="break-all">{apiBase}</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-200">Upstream API:</span>
+              <span className="break-all">{API_BASE}</span>
             </div>
-
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
-                Default threshold:
-              </span>
-              <span>
-                {loadingHealth
-                  ? "Loading..."
-                  : serverThreshold !== null
-                  ? serverThreshold
-                  : "Unknown (health not reachable)"}
-              </span>
-            </div>
-
-            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300">
-              <div className="font-semibold text-slate-700 dark:text-slate-200">Railway variable</div>
-              <div className="mt-1">
-                Set on the API service:{" "}
-                <span className="font-mono">DEFAULT_PROB_THRESHOLD=0.4</span>
-                {" "}to make approvals stricter.
-              </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300">
+              The UI calls <span className="font-mono">/api/predict</span> (Next.js proxy) to avoid browser fetch issues.
             </div>
           </div>
         </section>
@@ -246,27 +197,6 @@ export default function Page() {
             <ReadOnly label="Debt-to-income ratio" value={Number.isFinite(dti) ? dti.toFixed(2) : "0.00"} />
           </div>
 
-          <div className="mt-6">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-              API Base URL (optional)
-            </label>
-            <div className="mt-2 flex gap-2">
-              <input
-                value={apiBase}
-                onChange={(e) => setApiBase(e.target.value)}
-                placeholder="https://..."
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-              />
-              <button
-                type="button"
-                onClick={() => fetchHealth(apiBase)}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
-              >
-                Test
-              </button>
-            </div>
-          </div>
-
           {/* Result */}
           <div className="mt-7">
             {error && (
@@ -289,7 +219,6 @@ export default function Page() {
 
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Metric label="prob_default" value={result.prob_default.toFixed(4)} />
-                  <Metric label="threshold" value={String(result.default_prob_threshold)} />
                   <Metric label="DTI (derived)" value={String(result.derived?.debt_to_income_ratio ?? dti.toFixed(4))} />
                   <Metric
                     label="Decision"
