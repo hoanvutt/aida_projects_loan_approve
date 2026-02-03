@@ -134,7 +134,7 @@ export default function Page() {
 
       <div className="mx-auto max-w-6xl px-6 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="pt-4">
-          <h1 className="text-5xl font-extrabold tracking-tight">Build. Test. Deploy.</h1>
+          <h1 className="text-5xl font-extrabold tracking-tight">Loan Approval System</h1>
           <p className="mt-5 text-lg opacity-80 max-w-xl">
             Enter a loan application, or generate random data, then run a quick <span className="font-semibold">approve / reject</span> check
             using your deployed Logistic Regression model.
