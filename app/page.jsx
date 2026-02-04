@@ -118,7 +118,7 @@ export default function Page() {
               href="https://aida-sos-loan-prediction-api.up.railway.app/docs"
               target="_blank"
               rel="noreferrer"
-              title="Calls backend /health through proxy"
+              title="Link to API docs"
             >
               API Health
             </a>
