@@ -120,7 +120,7 @@ export default function Page() {
               rel="noreferrer"
               title="Link to API docs"
             >
-              API Health
+              API Docs
             </a>
             <button
               className={"px-4 py-2 rounded-xl border text-sm flex items-center gap-2 " + (isDark ? "border-slate-800 hover:bg-slate-900" : "border-slate-200 hover:bg-slate-50")}
