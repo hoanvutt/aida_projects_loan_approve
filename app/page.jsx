@@ -115,7 +115,7 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <a
               className={"px-4 py-2 rounded-xl border text-sm " + (isDark ? "border-slate-800 hover:bg-slate-900" : "border-slate-200 hover:bg-slate-50")}
-              href={"/api/health"}
+              href="https://aida-sos-loan-prediction-api.up.railway.app/docs"
               target="_blank"
               rel="noreferrer"
               title="Calls backend /health through proxy"
